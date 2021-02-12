@@ -40,7 +40,7 @@ public class RateLimitService implements IRateLimitService {
         SortedSet<Long> usages = rateLimitStorage.addAndGetWithinLimit(req);
 
         if (usages.size() > config.getCapacity()) {
-            usages.remove(now.toEpochMilli());
+            rateLimitStorage.remove(req);
             Long firstUsageInWindow = usages.last();
             Long waitFor = firstUsageInWindow + config.getExpiration().toMillis() - now.toEpochMilli();
 

@@ -18,4 +18,10 @@ public interface RateLimitStorage<T> {
      * @throws Exception - When closing the storage fails
      */
     void close() throws Exception;
+
+    /**
+     * Remove if present
+     * @param request
+     */
+    void remove(RateLimitRequest request);
 }

@@ -4,7 +4,7 @@
 
 
 This is a Basic Sliding Window API Rate Limiter with In-Memory Implementation using Spring Boot.
-It stores all the epochs as sorted set.
+It stores all the epochs as sorted set. Rate Limiting is per resource/api and user. 
 
 For Distributed/Centralised Storage, We can use Redis as Distributed Storage.
 Implementation can be provided by extending EpochStorage class.
@@ -25,9 +25,9 @@ If the request is fine, it will return 200 "OK".
 Otherwise, return 429 Status Code with *Text Rate limit exceeded. Try again in xx seconds* and an additional Header *x-retry-after* with value in seconds.
 
 #####How to change config limit:
-From [RateLimitConfigReader](https://github.com/guptaishabh/api-rate-limiter/blob/main/src/main/java/com/example/apiratelimiter/config/RateLimitConfigReader.java)
+From [application.properties](https://github.com/guptaishabh/api-rate-limiter/blob/main/src/main/resources/application.properties)
 
 Rate Limiting per User/IP:
 -
-- Rate Limits using client-id + route for authenticated user/api.
+- Rate Limits using client-id + route for authenticated user/api. With a client-id header to be passed within the request.
 - Otherwise rate limits on the caller remote address.

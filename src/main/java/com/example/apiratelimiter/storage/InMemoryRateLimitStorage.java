@@ -55,4 +55,12 @@ public class InMemoryRateLimitStorage implements EpochStorage {
 
     @Override
     public void close() throws Exception { }
+
+    @Override
+    public void remove(RateLimitRequest request) {
+        StorageRateLimitKey limitKey = StorageRateLimitKey.fromRequest(request);
+        if(cache.containsKey(limitKey)) {
+            cache.get(limitKey).remove(request.getEventTimestamp().toEpochMilli());
+        }
+    }
 }
