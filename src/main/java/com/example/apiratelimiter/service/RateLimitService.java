@@ -37,10 +37,11 @@ public class RateLimitService implements IRateLimitService {
         RateLimitRequest req = new RateLimitRequest(now, resourceName + "-" + userKey, config.getCapacity(),
                 config.getExpiration());
 
-        SortedSet<String> usages = rateLimitStorage.addAndGetWithinLimit(req);
+        SortedSet<Long> usages = rateLimitStorage.addAndGetWithinLimit(req);
 
         if (usages.size() > config.getCapacity()) {
-            Long firstUsageInWindow = Long.parseLong(usages.last());
+            usages.remove(now.toEpochMilli());
+            Long firstUsageInWindow = usages.last();
             Long waitFor = firstUsageInWindow + config.getExpiration().toMillis() - now.toEpochMilli();
 
             throw new RateLimitExceededException(String.format("Rate Limit Exceeded for %s", userKey), waitFor);

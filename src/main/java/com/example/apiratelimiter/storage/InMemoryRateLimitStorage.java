@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @Component
 public class InMemoryRateLimitStorage implements EpochStorage {
 
-    private Map<StorageRateLimitKey, SortedSet<String>> cache;
+    private Map<StorageRateLimitKey, SortedSet<Long>> cache;
     private Clock clock = Clock.systemDefaultZone();
 
     public InMemoryRateLimitStorage() {
@@ -32,15 +32,15 @@ public class InMemoryRateLimitStorage implements EpochStorage {
      * @return
      */
     @Override
-    public SortedSet<String> addAndGetWithinLimit(RateLimitRequest rateLimitRequest) {
+    public SortedSet<Long> addAndGetWithinLimit(RateLimitRequest rateLimitRequest) {
 
         StorageRateLimitKey limitKey = StorageRateLimitKey.fromRequest(rateLimitRequest);
 
-        SortedSet<String> usages = cache.computeIfAbsent(limitKey, (key) -> new ConcurrentSkipListSet<>(Comparator.reverseOrder()));
+        SortedSet<Long> usages = cache.computeIfAbsent(limitKey, (key) -> new ConcurrentSkipListSet<>(Comparator.reverseOrder()));
         removeExpired(limitKey);
 
         if(usages.size() <= rateLimitRequest.getCapacity())
-            usages.add(Long.toString(rateLimitRequest.getEventTimestamp().toEpochMilli()));
+            usages.add(rateLimitRequest.getEventTimestamp().toEpochMilli());
 
         return usages;
     }
@@ -48,9 +48,9 @@ public class InMemoryRateLimitStorage implements EpochStorage {
 
     private void removeExpired(StorageRateLimitKey limitKey) {
         Instant now = Instant.now(clock);
-        String limit = Long.toString(now.minusMillis(limitKey.getExpiration().toMillis()).toEpochMilli());
+        Long limit = now.minusMillis(limitKey.getExpiration().toMillis()).toEpochMilli();
 
-        cache.get(limitKey).removeIf(u -> u.compareTo(limit) < 0);
+        cache.get(limitKey).removeIf(u -> u < limit);
     }
 
     @Override
