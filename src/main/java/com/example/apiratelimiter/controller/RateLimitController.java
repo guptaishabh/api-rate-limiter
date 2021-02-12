@@ -37,7 +37,7 @@ public class RateLimitController {
 
         try {
             String userKey = getKey(headers, request);
-            rateLimitService.call(userKey, "/rate-limit/test");
+            rateLimitService.call(userKey, request.getRequestURI());
         } catch (RateLimitExceededException e) {
             log.error(String.format("API Rate Limit Exceeded for User: %s", getKey(headers, request)));
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
@@ -45,6 +45,7 @@ public class RateLimitController {
                     .body(String.format("Rate limit exceeded. Try again in %s seconds", e.getWaitInSec()));
         }
 
+        // Take action here
         return ResponseEntity.ok("OK");
     }
 }
